@@ -1,0 +1,49 @@
+version: '3.1'
+services:
+  nginx:
+    container_name: nginx
+    build:
+      context: ./
+      dockerfile: ./docker/nginx/nginx-Dockerfile
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "80:80"
+    volumes:
+      - ~/.data/logs/nginx:/var/log/nginx
+    command: nginx -g 'daemon off;'
+    depends_on:
+      - server
+    restart: always
+  mysql:
+    container_name: mysql
+    build:
+      context: ./
+      dockerfile: ./docker/mysql/mysql-Dockerfile
+    environment:
+      MYSQL_DATABASE: docker
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - ~/.data/mysql/mysql_data:/var/lib/mysql
+  server:
+    container_name: server
+    build:
+      context: ./
+      dockerfile: ./docker/app-Dockerfile
+    working_dir: /app
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./docker-test:/app
+      - ~/.m2:/root/.m2
+      - ~/.data/logs/server:/app/log
+    ports:
+      - "9090:9090"
+    command: mvn clean spring-boot:run -P docker -Dmaven.test.skip=true
+    depends_on:
+      - mysql
+    restart: always

@@ -1,0 +1,5 @@
+FROM nginx
+
+MAINTAINER eos2009 "chenfeilin@126.com"
+
+COPY ./docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
